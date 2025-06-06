@@ -493,14 +493,20 @@ function isApiKeySet(providerName, session = null, projectRoot = null) {
 		azure: 'AZURE_OPENAI_API_KEY',
 		openrouter: 'OPENROUTER_API_KEY',
 		xai: 'XAI_API_KEY',
-		vertex: 'GOOGLE_API_KEY' // Vertex uses the same key as Google
+		vertex: 'GOOGLE_API_KEY', // Vertex uses the same key as Google
+		'claude-code': null // Claude Code CLI doesn't need API keys
 		// Add other providers as needed
 	};
 
 	const providerKey = providerName?.toLowerCase();
-	if (!providerKey || !keyMap[providerKey]) {
+	if (!providerKey || !keyMap.hasOwnProperty(providerKey)) {
 		log('warn', `Unknown provider name: ${providerName} in isApiKeySet check.`);
 		return false;
+	}
+
+	// Special handling for providers that don't need API keys
+	if (keyMap[providerKey] === null) {
+		return true; // Claude Code CLI doesn't need API keys
 	}
 
 	const envVarName = keyMap[providerKey];
@@ -589,6 +595,8 @@ function getMcpApiKeyStatus(providerName, projectRoot = null) {
 				apiKeyToCheck = mcpEnv.GOOGLE_API_KEY; // Vertex uses Google API key
 				placeholderValue = 'YOUR_GOOGLE_API_KEY_HERE';
 				break;
+			case 'claude-code':
+				return true; // Claude Code CLI doesn't need API keys
 			default:
 				return false; // Unknown provider
 		}

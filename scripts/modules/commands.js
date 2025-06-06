@@ -264,17 +264,23 @@ async function runInteractiveSetup(projectRoot) {
 			.map(([provider, models]) => {
 				const providerModels = models
 					.filter((m) => m.allowed_roles.includes(role))
-					.map((m) => ({
-						name: `${provider} / ${m.id} ${
-							m.cost_per_1m_tokens
-								? chalk.gray(
+					.map((m) => {
+						// Special formatting for Claude Code CLI
+						const isClaudeCode = provider === 'claude-code';
+						const costDisplay = m.cost_per_1m_tokens
+							? isClaudeCode
+								? chalk.yellow('⚡ Free (Subscription)')
+								: chalk.gray(
 										`($${m.cost_per_1m_tokens.input.toFixed(2)} input | $${m.cost_per_1m_tokens.output.toFixed(2)} output)`
 									)
-								: ''
-						}`,
-						value: { id: m.id, provider },
-						short: `${provider}/${m.id}`
-					}));
+							: '';
+
+						return {
+							name: `${provider} / ${m.id} ${costDisplay}`,
+							value: { id: m.id, provider },
+							short: `${provider}/${m.id}`
+						};
+					});
 				if (providerModels.length > 0) {
 					return [...providerModels];
 				}
@@ -1913,7 +1919,7 @@ function registerCommands(programInstance) {
 				process.exit(1);
 			}
 		})
-		.on('error', function (err) {
+		.on('error', (err) => {
 			console.error(chalk.red(`Error: ${err.message}`));
 			showAddSubtaskHelp();
 			process.exit(1);
@@ -2049,7 +2055,7 @@ function registerCommands(programInstance) {
 				process.exit(1);
 			}
 		})
-		.on('error', function (err) {
+		.on('error', (err) => {
 			console.error(chalk.red(`Error: ${err.message}`));
 			showRemoveSubtaskHelp();
 			process.exit(1);
