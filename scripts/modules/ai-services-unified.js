@@ -39,7 +39,8 @@ import {
 	OllamaAIProvider,
 	BedrockAIProvider,
 	AzureProvider,
-	VertexAIProvider
+	VertexAIProvider,
+	ClaudeCodeAIProvider
 } from '../../src/ai-providers/index.js';
 
 // Create provider instances
@@ -53,7 +54,8 @@ const PROVIDERS = {
 	ollama: new OllamaAIProvider(),
 	bedrock: new BedrockAIProvider(),
 	azure: new AzureProvider(),
-	vertex: new VertexAIProvider()
+	vertex: new VertexAIProvider(),
+	'claude-code': new ClaudeCodeAIProvider()
 };
 
 // Helper function to get cost for a specific model
@@ -172,7 +174,8 @@ function _resolveApiKey(providerName, session, projectRoot = null) {
 		xai: 'XAI_API_KEY',
 		ollama: 'OLLAMA_API_KEY',
 		bedrock: 'AWS_ACCESS_KEY_ID',
-		vertex: 'GOOGLE_API_KEY'
+		vertex: 'GOOGLE_API_KEY',
+		'claude-code': null // Claude Code CLI doesn't need API keys
 	};
 
 	const envVarName = keyMap[providerName];
@@ -185,7 +188,11 @@ function _resolveApiKey(providerName, session, projectRoot = null) {
 	const apiKey = resolveEnvVariable(envVarName, session, projectRoot);
 
 	// Special handling for providers that can use alternative auth
-	if (providerName === 'ollama' || providerName === 'bedrock') {
+	if (
+		providerName === 'ollama' ||
+		providerName === 'bedrock' ||
+		providerName === 'claude-code'
+	) {
 		return apiKey || null;
 	}
 
